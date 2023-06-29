@@ -1,6 +1,6 @@
 <?php
 
-namespace TemplateCustomPost\Inc;
+namespace TemplateCustomPost\inc;
 
 function register_custom_post_type() {
     $supports = array(

@@ -1,6 +1,6 @@
 <?php
 
-namespace TemplateCustomPost\Inc;
+namespace TemplateCustomPost\inc;
 
 use const TemplateCustomPost\PLUGINROOT;
 

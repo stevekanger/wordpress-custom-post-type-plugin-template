@@ -1,6 +1,6 @@
 <?php
 
-namespace TemplateCustomPost\Utils;
+namespace TemplateCustomPost\utils;
 
 if (!function_exists('write_log')) {
 

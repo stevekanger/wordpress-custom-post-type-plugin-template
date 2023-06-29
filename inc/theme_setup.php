@@ -1,6 +1,6 @@
 <?php
 
-namespace TemplateCustomPost\Inc;
+namespace TemplateCustomPost\inc;
 
 function theme_setup() {
     add_theme_support('post-thumbnails');
