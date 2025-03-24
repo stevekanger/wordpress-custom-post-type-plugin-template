@@ -2,6 +2,8 @@
 
 namespace TemplateCustomPost\lib;
 
+use const TemplateCustomPost\PLUGIN_ROOT_DIR;
+
 defined('ABSPATH') || exit;
 
 /**
@@ -168,6 +170,36 @@ final class CustomPostType {
                 }
             }, 10, 3);
         }
+
+        return $this;
+    }
+
+    /**
+     * Register a custom template for the post type
+     *
+     * This should really not be used and the theme should house the template.
+     * Use this only if you must.
+     *
+     * @param string $type The type of template eg. 'single' or 'archive'
+     * @param string $template_file The template file to display 
+     * @return CustomPostType
+     *
+     * @since 0.0.1
+     */
+    public function with_template(string $type, string $template_file): CustomPostType {
+        add_filter('template_include', function ($template) use ($type, $template_file) {
+            if (!file_exists($template_file)) {
+                return $template;
+            }
+
+            if (
+                ($type == 'single' && is_singular($this->slug)) ||
+                ($type == 'archive' && is_post_type_archive($this->slug))
+            ) {
+                return $template_file;
+            }
+            return $template;
+        });
 
         return $this;
     }

@@ -36,13 +36,16 @@ require_once PLUGIN_ROOT_DIR . '/lib/Utils.php';
 Plugin::init();
 
 // Create some custom post types
-(new CustomPostType(
+$custom_post_type = new CustomPostType(
     'post-slug',
     'Custom Post',
     'Custom Posts',
     ['post_tag', 'category']
-))
+);
+
+$custom_post_type
     ->with_category_default()
+    ->with_template('archive', PLUGIN_ROOT_DIR . '/templates/single.html')
     ->register_taxonomy('some-taxonomy', [
         'label' => __('Some Taxonomy', 'template-custom-post'),
         'public' => true,
