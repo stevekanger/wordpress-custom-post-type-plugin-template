@@ -35,5 +35,11 @@ require_once PLUGIN_ROOT_DIR . '/lib/Utils.php';
 // Init Plugin
 Plugin::init();
 
-// Create custom post types
-new CustomPostType('post-slug', 'Custom Post', 'Custom Posts');
+(new CustomPostType(
+    'post-slug',
+    'Custom Post',
+    'Custom Posts',
+    ['post_tag', 'category']
+))
+    ->register_taxonomy('some-taxonomy', 'Some Taxonomy')
+    ->with_category_default('some-taxonomy', 'Custom Uncategorized');
