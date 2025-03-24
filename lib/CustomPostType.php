@@ -177,31 +177,17 @@ final class CustomPostType {
      *
      * @param string $taxonomy_slug The slug of the taxonomy
      * @param string $label The label to use for the taxonomy
+     * @param array $args the args for creating the taxonomy (see https://developer.wordpress.org/reference/functions/register_taxonomy/#parameters)
      * @return CustomPostType
      *
      * @since 0.0.1
      */
-    public function register_taxonomy(string $taxonomy_slug, string $label): CustomPostType {
-        add_action('init', function () use ($taxonomy_slug, $label) {
+    public function register_taxonomy(string $taxonomy_slug, array $args): CustomPostType {
+        add_action('init', function () use ($taxonomy_slug, $args) {
             register_taxonomy(
                 $taxonomy_slug,
-                $this->slug, // Custom post type slug (from the class property)
-                array(
-                    'label' => sprintf(__('%s', 'template-custom-post'), $label),
-                    'hierarchical' => true, // Set to true for category-like behavior
-                    'public' => true,
-                    'has_archive' => true,
-                    'show_ui' => true,
-                    'show_admin_column' => true,
-                    'show_in_rest' => true,
-                    'query_var' => true,
-                    'rewrite' => array('slug' => $taxonomy_slug),
-                    'default_term' => [
-                        'name' => $label . ' Uncategorized',
-                        'slug' => $taxonomy_slug . '_uncategorized',
-                        'description' => 'Uncategorized posts for ' . $label
-                    ]
-                )
+                $this->slug,
+                $args
             );
         });
 
