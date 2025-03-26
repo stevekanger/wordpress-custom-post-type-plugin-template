@@ -2,8 +2,6 @@
 
 namespace TemplateCustomPost\lib;
 
-use const TemplateCustomPost\PLUGIN_ROOT_DIR;
-
 defined('ABSPATH') || exit;
 
 /**
@@ -13,29 +11,40 @@ defined('ABSPATH') || exit;
  */
 final class CustomPostType {
     private string $slug;
-    private string $singular_name;
-    private string $plural_name;
-    private array $taxonomies;
-    private ?\WP_Post_Type $wp_post_type;
+    private string $single_label;
+    private string $plural_label;
+    private array $args;
+    private ?\WP_Post_Type $wp_post_type = null;
 
     /**
      * Custom post type constructor.
      *
      * @param string $slug The slug used for the custom post.
-     * @param string $singular_name The capitalized name used when there is only one of the post.
-     * @param string $plural_name The capitalized name used when there is multiple of the post.
+     * @param string $label The capitalized name used when there is only one of the post.
+     * @param array $args The args for the post type. (see: https://developer.wordpress.org/reference/functions/register_post_type/#parameters)
      * @return void
      *
      * @since 0.0.1
      */
-    public function __construct(string $slug, string $singular_name, string $plural_name, array $taxonomies = []) {
+    public function __construct(string $slug, string $single_label, string $plural_label, array $args = []) {
         $this->slug = $slug;
-        $this->singular_name = $singular_name;
-        $this->plural_name = $plural_name;
-        $this->taxonomies = $taxonomies;
+        $this->single_label = $single_label;
+        $this->plural_label = $plural_label;
+        $this->args = $this->create_args($args);
+        $this->register();
+    }
 
-        add_action('init', [$this, 'register_custom_post_type']);
-        add_action('after_setup_theme', [$this, 'theme_setup']);
+    /**
+     * Registers the custom post type
+     *
+     * @return CustomPostType
+     *
+     * @since 0.0.1
+     */
+    private function register(): void {
+        add_action('init', function () {
+            $this->wp_post_type = register_post_type($this->slug, $this->args);
+        });
     }
 
     /**
@@ -50,66 +59,56 @@ final class CustomPostType {
     }
 
     /**
-     * Registers the theme support for the custom post type
+     * Create the args array 
      *
-     * @return void.
+     * Merges in the defaults with the specified args
      *
-     * @since 0.0.1
-     */
-    public function theme_setup(): void {
-        add_theme_support('post-thumbnails');
-    }
-
-    /**
-     * Registers the custom post type
-     *
-     * @return void.
+     * @param array $args The specified args from the constructor
+     * @return array The merged args
      *
      * @since 0.0.1
      */
-    public function register_custom_post_type(): void {
-        $supports = [
-            'title', // post title
-            'editor', // post content
-            'author', // post author
-            'thumbnail', // featured images
-            'excerpt', // post excerpt
-            'custom-fields', // custom fields
-            'comments', // post comments
-            'revisions', // post revisions
-            'post-formats', // post formats
-        ];
-
-        $labels = [
-            'name'                  => sprintf(_x('%s', 'Post type general name', 'template-custom-post'), $this->singular_name),
-            'singular_name'         => sprintf(_x('%s', 'Post type singular name', 'template-custom-post'), $this->singular_name),
-            'menu_name'             => sprintf(_x('%s', 'Admin Menu text', 'template-custom-post'), $this->plural_name),
-            'name_admin_bar'        => sprintf(_x('%s', 'Add New on Toolbar', 'template-custom-post'), $this->singular_name),
-            'add_new'               => __('Add New', 'template-custom-post'),
-            'add_new_item'          => sprintf(__('Add New %s', 'template-custom-post'), $this->singular_name),
-            'new_item'              => sprintf(__('New %s', 'template-custom-post'), $this->singular_name),
-            'edit_item'             => sprintf(__('Edit %s', 'template-custom-post'), $this->singular_name),
-            'view_item'             => sprintf(__('View %s', 'template-custom-post'), $this->singular_name),
-            'all_items'             => sprintf(__('All %s', 'template-custom-post'),  $this->plural_name),
-            'search_items'          => sprintf(__('Search %s', 'template-custom-post'), $this->plural_name),
-            'parent_item_colon'     => sprintf(__('Parent %s:', 'template-custom-post'), $this->singular_name),
-            'not_found'             => sprintf(__('No %s found.', 'template-custom-post'), strtolower($this->singular_name)),
-            'not_found_in_trash'    => sprintf(__('No %s found in Trash.', 'template-custom-post'), strtolower($this->singular_name)),
-            'featured_image'        => sprintf(_x('%s featured image', 'Overrides the “Featured Image” phrase for this post type. Added in 4.3', 'template-custom-post'), $this->plural_name),
-            'set_featured_image'    => _x('Set featured image', 'Overrides the “Set featured image” phrase for this post type. Added in 4.3', 'template-custom-post'),
-            'remove_featured_image' => _x('Remove featured image', 'Overrides the “Remove featured image” phrase for this post type. Added in 4.3', 'template-custom-post'),
-            'use_featured_image'    => _x('Use as featured image', 'Overrides the “Use as featured image” phrase for this post type. Added in 4.3', 'template-custom-post'),
-            'archives'              => sprintf(_x('%s archives', 'The post type archive label used in nav menus. Default “Post Archives”. Added in 4.4', 'template-custom-post'), $this->singular_name),
-            'insert_into_item'      => sprintf(_x('Insert into %s', 'Overrides the “Insert into post”/”Insert into page” phrase (used when inserting media into a post). Added in 4.4', 'template-custom-post'), strtolower($this->singular_name)),
-            'uploaded_to_this_item' => sprintf(_x('Uploaded to this %s', 'Overrides the “Uploaded to this post”/”Uploaded to this page” phrase (used when viewing media attached to a post). Added in 4.4', 'template-custom-post'), strtolower($this->singular_name)),
-            'filter_items_list'     => sprintf(_x('Filter %s list', 'Screen reader text for the filter links heading on the post type listing screen. Default “Filter posts list”/”Filter pages list”. Added in 4.4', 'template-custom-post'), strtolower($this->singular_name)),
-            'items_list_navigation' => sprintf(_x('%s list navigation', 'Screen reader text for the pagination heading on the post type listing screen. Default “Posts list navigation”/”Pages list navigation”. Added in 4.4', 'template-custom-post'), $this->singular_name),
-            'items_list'            => sprintf(_x('%s list', 'Screen reader text for the items list heading on the post type listing screen. Default “Posts list”/”Pages list”. Added in 4.4', 'template-custom-post'), $this->singular_name),
-        ];
-
-        $args = [
-            'supports' => $supports,
-            'labels' => $labels,
+    private function create_args(array $args): array {
+        return array_merge([
+            'supports' => [
+                'title',
+                'editor',
+                'comments',
+                'revisions',
+                'trackbacks',
+                'author',
+                'excerpt',
+                'page-attributes',
+                'thumbnail',
+                'custom-fields',
+                'post-formats'
+            ],
+            'labels' => [
+                'name'                  => sprintf(_x('%s', 'Post type general name', 'template-custom-post'), $this->plural_label),
+                'singular_name'         => sprintf(_x('%s', 'Post type singular name', 'template-custom-post'), $this->single_label),
+                'menu_name'             => sprintf(_x('%s', 'Admin Menu text', 'template-custom-post'), $this->plural_label),
+                'name_admin_bar'        => sprintf(_x('%s', 'Add New on Toolbar', 'template-custom-post'), $this->plural_label),
+                'add_new'               => __('Add New', 'template-custom-post'),
+                'add_new_item'          => sprintf(__('Add New %s', 'template-custom-post'), $this->single_label),
+                'new_item'              => sprintf(__('New %s', 'template-custom-post'), $this->single_label),
+                'edit_item'             => sprintf(__('Edit %s', 'template-custom-post'), $this->single_label),
+                'view_item'             => sprintf(__('View %s', 'template-custom-post'), $this->single_label),
+                'all_items'             => sprintf(__('All %s', 'template-custom-post'),  $this->plural_label),
+                'search_items'          => sprintf(__('Search %s', 'template-custom-post'), $this->plural_label),
+                'parent_item_colon'     => sprintf(__('Parent %s:', 'template-custom-post'), $this->single_label),
+                'not_found'             => sprintf(__('No %s found.', 'template-custom-post'), strtolower($this->plural_label)),
+                'not_found_in_trash'    => sprintf(__('No %s found in Trash.', 'template-custom-post'), strtolower($this->plural_label)),
+                'featured_image'        => sprintf(_x('%s featured image', 'Overrides the “Featured Image” phrase for this post type. Added in 4.3', 'template-custom-post'), $this->single_label),
+                'set_featured_image'    => _x('Set featured image', 'Overrides the “Set featured image” phrase for this post type. Added in 4.3', 'template-custom-post'),
+                'remove_featured_image' => _x('Remove featured image', 'Overrides the “Remove featured image” phrase for this post type. Added in 4.3', 'template-custom-post'),
+                'use_featured_image'    => _x('Use as featured image', 'Overrides the “Use as featured image” phrase for this post type. Added in 4.3', 'template-custom-post'),
+                'archives'              => sprintf(_x('%s archives', 'The post type archive label used in nav menus. Default “Post Archives”. Added in 4.4', 'template-custom-post'), $this->plural_label),
+                'insert_into_item'      => sprintf(_x('Insert into %s', 'Overrides the “Insert into post”/”Insert into page” phrase (used when inserting media into a post). Added in 4.4', 'template-custom-post'), strtolower($this->single_label)),
+                'uploaded_to_this_item' => sprintf(_x('Uploaded to this %s', 'Overrides the “Uploaded to this post”/”Uploaded to this page” phrase (used when viewing media attached to a post). Added in 4.4', 'template-custom-post'), strtolower($this->single_label)),
+                'filter_items_list'     => sprintf(_x('Filter %s list', 'Screen reader text for the filter links heading on the post type listing screen. Default “Filter posts list”/”Filter pages list”. Added in 4.4', 'template-custom-post'), strtolower($this->plural_label)),
+                'items_list_navigation' => sprintf(_x('%s list navigation', 'Screen reader text for the pagination heading on the post type listing screen. Default “Posts list navigation”/”Pages list navigation”. Added in 4.4', 'template-custom-post'), $this->single_label),
+                'items_list'            => sprintf(_x('%s list', 'Screen reader text for the items list heading on the post type listing screen. Default “Posts list”/”Pages list”. Added in 4.4', 'template-custom-post'), $this->plural_label),
+            ],
             'public' => true,
             'query_var' => true,
             'rewrite' => ['slug' => $this->slug],
@@ -117,34 +116,54 @@ final class CustomPostType {
             'hierarchical' => false,
             'show_in_rest' => true,
             'rest_base' => $this->slug,
-            'taxonomies' => $this->taxonomies,
-        ];
-
-        $this->wp_post_type = register_post_type($this->slug, $args);
-        $this->after_post_type_registered();
+            'taxonomies' => []
+        ], $args);
     }
 
     /**
-     * Do some stuff after the post type is registered
+     * Change a label from the defaults to something different
      *
-     * Add post type to archives
-     *
-     * @return void
+     * @param array $labels Key/value array of label to change and value 
+     * @return CustomPostType
      *
      * @since 0.0.1
      */
-    public function after_post_type_registered(): void {
-        add_action('pre_get_posts', function ($query) {
-            // add to categories archive
-            if ($query->is_category() && $query->is_main_query()) {
-                $query->set('post_type', ['post', $this->slug]);
-            }
+    public function labels(array $labels): CustomPostType {
+        $this->args['labels'] = array_merge($this->args['labels'], $labels);
+        return $this;
+    }
 
-            // Add to author archive
-            if ($query->is_author() && $query->is_main_query()) {
+    /**
+     * Registers the theme support for the custom post type
+     * eg 'post-thumbnails'
+     * @return CustomPostType
+     *
+     * @since 0.0.1
+     */
+    public function theme_support(...$supports): CustomPostType {
+        add_action('after_setup_theme', function () use ($supports) {
+            add_theme_support(...$supports);
+        });
+
+        return $this;
+    }
+
+
+    /**
+     * Add the custom post type to an archive
+     *
+     * @param callable $qualifier_cb The wordpress function that determines whether the query is for an existing archive page. Eg. is_tag, is_author, is_category.
+     * @return CustomPostType
+     *
+     * @since 0.0.1
+     */
+    public function archive(callable $qualifier_cb): CustomPostType {
+        add_action('pre_get_posts', function ($query) use ($qualifier_cb) {
+            if (call_user_func($qualifier_cb) && $query->is_main_query()) {
                 $query->set('post_type', ['post', $this->slug]);
             }
         });
+        return $this;
     }
 
     /**
@@ -155,8 +174,8 @@ final class CustomPostType {
      *
      * @since 0.0.1
      */
-    public function with_category_default(string $default_value = "Uncategorized"): CustomPostType {
-        if (in_array('category', $this->taxonomies)) {
+    public function category_default(string $default_value = "Uncategorized"): CustomPostType {
+        if (in_array('category', $this->args['taxonomies'])) {
             add_action('save_post', function (int $post_id, \WP_POST $post, bool $update) use ($default_value) {
                 if ($this->slug != $post->post_type) {
                     return;
@@ -180,22 +199,15 @@ final class CustomPostType {
      * This should really not be used and the theme should house the template.
      * Use this only if you must.
      *
-     * @param string $type The type of template eg. 'single' or 'archive'
+     * @param callable $qualifier_cb The wordpress function that determines whether the template is for an existing page. Eg. is_singular, is_post_type_archive.
      * @param string $template_file The template file to display 
      * @return CustomPostType
      *
      * @since 0.0.1
      */
-    public function with_template(string $type, string $template_file): CustomPostType {
-        add_filter('template_include', function ($template) use ($type, $template_file) {
-            if (!file_exists($template_file)) {
-                return $template;
-            }
-
-            if (
-                ($type == 'single' && is_singular($this->slug)) ||
-                ($type == 'archive' && is_post_type_archive($this->slug))
-            ) {
+    public function template(string $qualifier_cb, string $template_file): CustomPostType {
+        add_filter('template_include', function ($template) use ($qualifier_cb, $template_file) {
+            if (file_exists($template_file) && call_user_func($qualifier_cb, $this->slug)) {
                 return $template_file;
             }
             return $template;
@@ -208,7 +220,6 @@ final class CustomPostType {
      * Register a taxonomy for the custom post type
      *
      * @param string $taxonomy_slug The slug of the taxonomy
-     * @param string $label The label to use for the taxonomy
      * @param array $args the args for creating the taxonomy (see https://developer.wordpress.org/reference/functions/register_taxonomy/#parameters)
      * @return CustomPostType
      *

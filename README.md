@@ -1,6 +1,6 @@
 # Custom post type plugin for wordpress
 
-Simple plugin to easily create custom post types for my clients
+Simple plugin to easily create custom post types
 
 ## Installation
 
@@ -12,6 +12,6 @@ In `plugin.php` replace all valid information and then just create some custom p
 
 ```php
 
-new CustomPostType("post-type-slug", "Singular Name", "Plural Name");
+new CustomPostType("post-type-slug", "Post Type Label Single", "Post Type Label Plural");
 
 ```
