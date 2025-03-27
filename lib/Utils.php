@@ -7,7 +7,7 @@ defined('ABSPATH') || exit;
 /**
  * Utilities for the plugin
  *
- * @since 0.0.1
+ * @since 0.1.0
  */
 class Utils {
     /**
@@ -18,7 +18,7 @@ class Utils {
      * @param mixed ...$items The items to log
      * @return void
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     public static function debug(mixed ...$items) {
         $backtrace = debug_backtrace();

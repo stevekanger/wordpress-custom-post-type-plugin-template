@@ -11,7 +11,7 @@ defined('ABSPATH') || exit;
  *
  * This class handles plugin functions like activation and deactivation
  *
- * @since 0.0.1
+ * @since 0.1.0
  */
 class Plugin {
     /**
@@ -19,7 +19,7 @@ class Plugin {
      *
      * @return void
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     public static function init() {
         register_activation_hook(PLUGIN_ROOT_FILE, [self::class, 'activate']);
@@ -33,7 +33,7 @@ class Plugin {
      *
      * @return void;
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     public static function activate() {
         flush_rewrite_rules(); // Use when creating custom post types
@@ -46,7 +46,7 @@ class Plugin {
      *
      * @return void;
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     public static function deactivate() {
         flush_rewrite_rules(); // Use when creating custom post types

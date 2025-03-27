@@ -7,7 +7,7 @@ defined('ABSPATH') || exit;
 /**
  * A custom class to register a custom post type
  *
- * @since 0.0.1
+ * @since 0.1.0
  */
 final class CustomPostType {
     private string $slug;
@@ -24,7 +24,7 @@ final class CustomPostType {
      * @param array $args The args for the post type. (see: https://developer.wordpress.org/reference/functions/register_post_type/#parameters)
      * @return void
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     public function __construct(string $slug, string $single_label, string $plural_label, array $args = []) {
         $this->slug = $slug;
@@ -39,7 +39,7 @@ final class CustomPostType {
      *
      * @return CustomPostType
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     private function register(): void {
         add_action('init', function () {
@@ -52,7 +52,7 @@ final class CustomPostType {
      *
      * @return ?WP_Post_Type
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     public function get_wp_post_type(): ?\WP_Post_Type {
         return $this->wp_post_type;
@@ -66,7 +66,7 @@ final class CustomPostType {
      * @param array $args The specified args from the constructor
      * @return array The merged args
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     private function create_args(array $args): array {
         return array_merge([
@@ -126,7 +126,7 @@ final class CustomPostType {
      * @param array $labels Key/value array of label to change and value 
      * @return CustomPostType
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     public function labels(array $labels): CustomPostType {
         $this->args['labels'] = array_merge($this->args['labels'], $labels);
@@ -138,7 +138,7 @@ final class CustomPostType {
      * eg 'post-thumbnails'
      * @return CustomPostType
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     public function theme_support(...$supports): CustomPostType {
         add_action('after_setup_theme', function () use ($supports) {
@@ -155,7 +155,7 @@ final class CustomPostType {
      * @param callable $qualifier_cb The wordpress function that determines whether the query is for an existing archive page. Eg. is_tag, is_author, is_category.
      * @return CustomPostType
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     public function archive(callable $qualifier_cb): CustomPostType {
         add_action('pre_get_posts', function ($query) use ($qualifier_cb) {
@@ -172,7 +172,7 @@ final class CustomPostType {
      * @param string $defalut_value The default value
      * @return CustomPostType
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     public function category_default(string $default_value = "Uncategorized"): CustomPostType {
         if (in_array('category', $this->args['taxonomies'])) {
@@ -203,7 +203,7 @@ final class CustomPostType {
      * @param string $template_file The template file to display 
      * @return CustomPostType
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     public function template(string $qualifier_cb, string $template_file): CustomPostType {
         add_filter('template_include', function ($template) use ($qualifier_cb, $template_file) {
@@ -223,7 +223,7 @@ final class CustomPostType {
      * @param array $args the args for creating the taxonomy (see https://developer.wordpress.org/reference/functions/register_taxonomy/#parameters)
      * @return CustomPostType
      *
-     * @since 0.0.1
+     * @since 0.1.0
      */
     public function register_taxonomy(string $taxonomy_slug, array $args): CustomPostType {
         add_action('init', function () use ($taxonomy_slug, $args) {
